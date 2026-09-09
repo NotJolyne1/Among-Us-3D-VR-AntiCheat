@@ -56,7 +56,7 @@ namespace AntiCheat.Managers
                 GameReferences.Killing!.KillPlayer(UnityEngine.Object.FindObjectOfType<AirlockPeer>(), GameReferences.Rig!.PState, GameReferences.Rig.PState.PlayerId, false);
             }
 
-            if (GUI.Button(new Rect(20f, 290f, 160f, 30f), "Die"))
+            if (GUI.Button(new Rect(20f, 290f, 160f, 30f), "vote"))
             {
                 foreach (PlayerState player in GameReferences.Spawn!.ActivePlayerStates)
                 {

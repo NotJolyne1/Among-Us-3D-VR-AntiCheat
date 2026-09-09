@@ -59,4 +59,5 @@ namespace AntiCheat
  * Cosmetic Change Verification
  * Join Verification
  * Name Change Verification
+ * Venting verification
 */

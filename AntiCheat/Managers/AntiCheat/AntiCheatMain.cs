@@ -202,7 +202,10 @@ namespace AntiCheat.Managers.AntiCheat
 
             PlayerState InfoCaller = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
-            if (!reported.IsAlive)
+            if (InfoCaller == null || InfoCaller != caller)
+                return false;
+
+            if (reported.IsAlive)
                 return false;
 
             if (!GameReferences.Spawn!._playerIdToBody.TryGetValue(reported.PlayerId, out var BodyObj))
@@ -213,14 +216,15 @@ namespace AntiCheat.Managers.AntiCheat
             if (body == null || !body._playerBody.active)
                 return false;
 
-            if ((InfoCaller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).sqrMagnitude > 5f)
+            if ((caller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).sqrMagnitude > 5f)
                 return false;
 
             if (GameReferences.GameState!.GameModeStateValue.GameMode == GameModes.Infection)
                 return false;
 
-            if (!GameReferences.GameState!.InTaskState())
+            if (!GameReferences.GameState.InTaskState())
                 return false;
+
             return true;
         }
 
@@ -307,15 +311,13 @@ namespace AntiCheat.Managers.AntiCheat
             if (instance.PState.PlayerId != player)
                 return false;
 
-            if (cosmetic < 0 || cosmetic > GameReferences.Customization!._elementCollection.AllCustomizationElements.Count)
+            int count = GameReferences.Customization!._elementCollection.AllCustomizationElements.Count;
+
+            if (cosmetic < 0 || cosmetic >= count)
                 return false;
 
             if (cosmetic == 98)
                 return false;
-
-            if (!GameReferences.GameState!.InLobbyState() && GameReferences.GameState!.GameModeStateValue.GameMode != GameModes.Infection)
-                return false;
-
             return true;
         }
 
@@ -324,7 +326,7 @@ namespace AntiCheat.Managers.AntiCheat
         {
             if (deputy == null || voted == null) return false;
 
-            if (!voted.IsAlive || !voted.IsSpectating)
+            if (!voted.IsAlive)
                 return false;
 
             if (deputy == voted)
@@ -361,8 +363,31 @@ namespace AntiCheat.Managers.AntiCheat
             if (name.Length > 17)
                 return false;
 
-            if (Regex.IsMatch(name, @"@|\$|%|\^|&|\(|\)|<|>|\+|=", RegexOptions.IgnoreCase) ||
-                Regex.IsMatch(name, @"[\u200B-\u200D\uFEFF\u200E\u200F]|\A\s*\z")) return false;
+            if (Regex.IsMatch(name, @"[@$%\^&()<>+=]"))
+                return false;
+            return true;
+        }
+
+
+        internal static bool VerifyVentEnter(NetworkedLocomotionPlayer player)
+        {
+            GameRole VenterRole = Commands.GetPlayerRole(player.PState.PlayerId);
+
+            if (player == null) return false;
+
+            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps == PowerUps.CanVent)
+                return false;
+            return true;
+        }
+
+        internal static bool VerifyVentExit(NetworkedLocomotionPlayer player)
+        {
+            GameRole VenterRole = Commands.GetPlayerRole(player.PState.PlayerId);
+
+            if (player == null) return false;
+
+            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps == PowerUps.CanVent)
+                return false;
             return true;
         }
     }
