@@ -7,7 +7,7 @@ namespace AntiCheat.Managers
 {
     internal class Commands
     {
-        internal static void KickPlayerViaAntiCheat(int player, string reason)
+        internal static void KickPlayerViaAntiCheat(int player, string reason, bool blacklist)
         {
             if (Settings.IsHost)
             {

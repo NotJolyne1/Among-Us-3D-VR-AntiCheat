@@ -4,24 +4,62 @@ using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Network;
 using Il2CppSG.Airlock.Roles;
 using MelonLoader;
+using System.Text.RegularExpressions;
 using UnityEngine;
-using static Il2CppFusion.Simulation;
-using static MelonLoader.MelonLogger;
 
 namespace AntiCheat.Managers.AntiCheat
 {
     internal class AntiCheatMain
     {
         private static readonly Dictionary<int, int> MeetingsCalled = new();
+        private static float _checkTimer = 0f;
 
         internal static void Update()
         {
-            if (!Settings.InGame || GameReferences.Rig == null) return;
+            if (!Settings.InGame || GameReferences.Rig == null)
+            {
+                _checkTimer = 0f;
+                return;
+            }
             Settings.IsHost = GameReferences.Rig.PState.PlayerId == 9;
 
             if (Settings.NoCooldown && GameReferences.Rig.PState.ActionCooldownRemaining != 0)
                 GameReferences.Killing!.SetMaxCooldown(0);
+
+            _checkTimer += Time.deltaTime;
+            if (_checkTimer >= 10f)
+            {
+                _checkTimer = 0f;
+
+                try
+                {
+                    CheckPlayers();
+                }
+                catch (System.Exception ex)
+                {
+                    MelonLogger.Error($"Error occurred during CheckPlayers: {ex}");
+                }
+            }
         }
+
+
+
+
+
+        private static void CheckPlayers()
+        {
+            foreach (PlayerState player in GameReferences.Spawn!.ActivePlayerStates)
+            {
+                if (player == null || !player.IsConnected || !player.IsSpawned || string.IsNullOrEmpty(player.PlayerModerationID.Value)) continue;
+
+                if (player.HatId == 98) Detected(player, "Illegal cosmetics");
+                if (!VerifyName(player, player.NetworkName.Value)) Detected(player, "Illegal name");
+
+            }
+        }
+
+
+
 
         internal static void ResetAntiCheat()
         {
@@ -34,7 +72,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (Settings.IsHost)
             {
                 Logger.Warning($"Kicking {cheater.NetworkName.Value} for cheating. Reason: {reason}");
-                Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason);
+                Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, false);
             }
         }
 
@@ -61,7 +99,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (KillerRole != GameRole.Impostor && KillerRole != GameRole.Revenger && KillerRole != GameRole.Vigilante)
                 return false;
 
-            if ((killer.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).magnitude > 5f)
+            if ((killer.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
                 return false;
 
             if (killer.ActionCooldownRemaining > 0.1f)
@@ -96,7 +134,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (TaggerRole != GameRole.Infected)
                 return false;
 
-            if ((tagger.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).magnitude > 5f)
+            if ((tagger.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
                 return false;
 
             if (tagger.ActionCooldownRemaining > 0.1f)
@@ -142,10 +180,8 @@ namespace AntiCheat.Managers.AntiCheat
             if (called >= GameReferences.Button!._maxAllowedCalls)
                 return false;
 
-            GameObject button = GameObject.Find("UI_EmergencyButton");
-            if (button == null) return false;
 
-            if ((caller.LocomotionPlayer.RigidbodyPosition - button.transform.position).magnitude > 5f)
+            if ((caller.LocomotionPlayer.RigidbodyPosition - GameReferences.Button._buttonCollider.transform.position).sqrMagnitude > 5f)
                 return false;
 
             MeetingsCalled[info.Source.PlayerId] = called + 1;
@@ -177,7 +213,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (body == null || !body._playerBody.active)
                 return false;
 
-            if ((InfoCaller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).magnitude > 5f)
+            if ((InfoCaller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).sqrMagnitude > 5f)
                 return false;
 
             if (GameReferences.GameState!.GameModeStateValue.GameMode == GameModes.Infection)
@@ -277,6 +313,9 @@ namespace AntiCheat.Managers.AntiCheat
             if (cosmetic == 98)
                 return false;
 
+            if (!GameReferences.GameState!.InLobbyState() && GameReferences.GameState!.GameModeStateValue.GameMode != GameModes.Infection)
+                return false;
+
             return true;
         }
 
@@ -306,9 +345,24 @@ namespace AntiCheat.Managers.AntiCheat
             if (hat == 98)
                 return false;
 
-            if (joining.Runner.GetPlayerUserId() != UserId)
+            if (joining.Runner.GetPlayerUserId(joining.PState.PlayerId) != UserId)
                 return false;
 
+            return true;
+        }
+
+
+
+        internal static bool VerifyName(PlayerState player, string name)
+        {
+            if (player == null || string.IsNullOrEmpty(name))
+                return false;
+
+            if (name.Length > 17)
+                return false;
+
+            if (Regex.IsMatch(name, @"@|\$|%|\^|&|\(|\)|<|>|\+|=", RegexOptions.IgnoreCase) ||
+                Regex.IsMatch(name, @"[\u200B-\u200D\uFEFF\u200E\u200F]|\A\s*\z")) return false;
             return true;
         }
     }
