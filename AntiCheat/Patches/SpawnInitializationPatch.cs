@@ -1,4 +1,5 @@
 ﻿using AntiCheat.Config;
+using AntiCheat.Managers;
 using AntiCheat.Managers.AntiCheat;
 using HarmonyLib;
 using Il2CppSG.Airlock;
@@ -16,6 +17,8 @@ public static class SpawnInitializationPatch
             {
                 AntiCheatMain.Detected(__instance.PState, "Invalid join data");
             }
+            if (__instance.PState.IsBlacklisted())
+                AntiCheatMain.Detected(__instance.PState, "Player is on blacklist");
         }
     }
 }

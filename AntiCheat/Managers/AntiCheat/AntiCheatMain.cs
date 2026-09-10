@@ -62,6 +62,7 @@ namespace AntiCheat.Managers.AntiCheat
             {
                 if (player == null || !player.IsConnected || !player.IsSpawned || string.IsNullOrEmpty(player.PlayerModerationID.Value)) continue;
 
+                if (player.IsBlacklisted() && !player.IsWhitelisted()) Detected(player, "Player is on the blacklist");
                 if (player.HatId == 98) Detected(player, "Illegal cosmetics");
                 if (!VerifyName(player, player.NetworkName.Value)) Detected(player, "Illegal name");
             }
@@ -96,7 +97,7 @@ namespace AntiCheat.Managers.AntiCheat
 
                         if (++Detections >= 4)
                         {
-                            Detected(Player, "Speed Hacks");
+                            Detected(Player, "Speed Hacks Detected");
                             Detections = 0;
                         }
 
@@ -127,10 +128,10 @@ namespace AntiCheat.Managers.AntiCheat
 
         internal static void Detected(PlayerState cheater, string reason)
         {
-            if (Settings.IsHost)
+            if (Settings.IsHost && !cheater.IsWhitelisted())
             {
                 Logger.Warning($"Kicking {cheater.NetworkName.Value} for cheating. Reason: {reason}");
-                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, false);
+                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, true);
             }
         }
 
