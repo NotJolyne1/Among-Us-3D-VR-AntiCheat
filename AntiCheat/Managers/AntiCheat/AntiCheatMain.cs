@@ -151,11 +151,15 @@ namespace AntiCheat.Managers.AntiCheat
                 return false;
 
             GameRole KillerRole = Commands.GetPlayerRole(killer.PlayerId);
+            GameRole VictimRole = Commands.GetPlayerRole(victim.PlayerId);
 
             if (!killer.IsAlive && KillerRole != GameRole.Revenger)
                 return false;
 
             if (KillerRole != GameRole.Impostor && KillerRole != GameRole.Revenger && KillerRole != GameRole.Vigilante)
+                return false;
+
+            if (VictimRole == GameRole.Impostor || VictimRole == GameRole.Revenger)
                 return false;
 
             if ((killer.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
