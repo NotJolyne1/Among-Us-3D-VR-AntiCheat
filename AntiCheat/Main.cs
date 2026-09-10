@@ -55,9 +55,12 @@ namespace AntiCheat
  * Body Spawn verification
  * vote verification
  * KickVote Verification
- * Crash Verification
+ * TakePhoto Verification
  * Cosmetic Change Verification
  * Join Verification
  * Name Change Verification
  * Venting verification
+ * Wardrobe enter verification
+ * Use Powerup verification
+ * Task completion verification
 */

@@ -1,4 +1,6 @@
-﻿using AntiCheat.Config;
+﻿using AntiCheat;
+using AntiCheat.Config;
+using AntiCheat.Managers.AntiCheat;
 using HarmonyLib;
 using Il2CppSG.Airlock.Network;
 using MelonLoader;
@@ -13,8 +15,8 @@ public static class KickVotePatch
     public static bool Prefix(ModerationManager __instance, int sourcePlayer, int kickPlayer)
     {
         if (!Settings.IsHost || !Settings.AntiCheatEnabled) return true;
-        if (kickPlayer < 0 || kickPlayer > 9) return false;
-        if (sourcePlayer == kickPlayer)
+
+        if (!AntiCheatMain.VerifyKickVote(sourcePlayer, kickPlayer))
         {
             MelonLogger.Warning($"Someone in your room is cheating, reason: Force Kick detected");
             return false;
@@ -32,9 +34,7 @@ public static class KickVotePatch
             for (int i = 0; i <= players.Count - 3; i++)
             {
                 if (players[i] == null || players[i + 1] == null || players[i + 2] == null) continue;
-                if (recent[recent.Count - 3].Source == players[i].PlayerId &&
-                    recent[recent.Count - 2].Source == players[i + 1].PlayerId &&
-                    recent[recent.Count - 1].Source == players[i + 2].PlayerId)
+                if (recent[recent.Count - 3].Source == players[i].PlayerId && recent[recent.Count - 2].Source == players[i + 1].PlayerId && recent[recent.Count - 1].Source == players[i + 2].PlayerId)
                 {
                     recent.Clear();
                     return false;

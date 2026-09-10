@@ -24,6 +24,11 @@ public static class CameraPlayPatch
         float now = Time.realtimeSinceStartup;
         if (now < BlockedUntil) return false;
 
+        if (!GameReferences.GameState!.InLobbyState())
+        {
+            MelonLogger.Warning("Someone in your lobby is cheating! Reason: TakePhoto called while game started");
+        }
+
         Clicks.RemoveAll(x => now - x > 1f);
         Clicks.Add(now);
 
