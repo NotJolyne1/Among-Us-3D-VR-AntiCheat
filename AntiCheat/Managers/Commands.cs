@@ -2,8 +2,11 @@
 using Il2CppFusion;
 using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Roles;
+using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
+using UnityEngine;
+using static MelonLoader.MelonLogger;
 
 namespace AntiCheat.Managers
 {
@@ -113,6 +116,13 @@ namespace AntiCheat.Managers
                 if (pair.Value.Contains(player)) return pair.Key;
 
             return GameRole.NotSet;
+        }
+
+        internal static IEnumerator CorrectLobbyDoors(GameStateManager manager, bool status)
+        {
+            yield return new WaitForEndOfFrame();
+            yield return new WaitForSeconds(0.35f);
+            manager.RPC_ToggleLobbyDoors(!status);
         }
     }
 }

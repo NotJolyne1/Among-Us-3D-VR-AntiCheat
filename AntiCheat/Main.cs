@@ -63,4 +63,5 @@ namespace AntiCheat
  * Wardrobe enter verification
  * Use Powerup verification
  * Task completion verification
+ * Lobby Door toggle verification
 */

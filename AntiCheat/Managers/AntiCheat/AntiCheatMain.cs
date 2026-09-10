@@ -472,5 +472,18 @@ namespace AntiCheat.Managers.AntiCheat
 
             return true;
         }
+
+        internal static bool VerifyToggleLobbyDoors(GameStateManager instance, bool closed)
+        {
+            if (closed)
+            {
+                if (!instance.InLobbyState() && !instance.InVotingState()) return false;
+            }
+            else
+            {
+                if (instance.InLobbyState() || instance.InVotingState()) return false;
+            }
+            return true;
+        }
     }
 }

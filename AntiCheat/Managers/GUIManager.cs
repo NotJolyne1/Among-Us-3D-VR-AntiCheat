@@ -64,6 +64,16 @@ namespace AntiCheat.Managers
                         GameReferences.Vote!.RPC_Vote(player.PlayerId);
                 }
             }
+
+            if (GUI.Button(new Rect(20f, 320f, 160f, 30f), "open lobby doors"))
+            {
+                GameReferences.GameState!.RPC_ToggleLobbyDoors(false);
+            }
+
+            if (GUI.Button(new Rect(20f, 350f, 160f, 30f), "close lobby doors"))
+            {
+                GameReferences.GameState!.RPC_ToggleLobbyDoors(true);
+            }
         }
     }
 }
