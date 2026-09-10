@@ -9,7 +9,7 @@ namespace AntiCheat.Managers
     {
         internal static void Display()
         {
-            if (!Settings.GUIEnabled) return;
+            if (!Settings.GUIEnabled || !Settings.DebugMode) return;
 
             if (GUI.Button(new Rect(20f, 50f, 160f, 30f), "No Cooldown"))
             {

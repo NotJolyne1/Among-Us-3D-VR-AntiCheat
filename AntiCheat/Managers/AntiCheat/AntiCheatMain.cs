@@ -12,12 +12,12 @@ namespace AntiCheat.Managers.AntiCheat
     internal class AntiCheatMain
     {
         private static readonly Dictionary<int, int> MeetingsCalled = new();
-        private static float _checkTimer = 0f;
-        private static Dictionary<PlayerState, int> FailedSpeedAttempts = new Dictionary<PlayerState, int>();
-        private static Dictionary<PlayerState, Vector3> PrevPosition = new Dictionary<PlayerState, Vector3>();
-        private static Dictionary<PlayerState, int> SpeedDetections = new Dictionary<PlayerState, int>();
-        private static Dictionary<PlayerState, int> PositionViolations = new Dictionary<PlayerState, int>();
+        private static readonly Dictionary<PlayerState, int> FailedSpeedAttempts = new Dictionary<PlayerState, int>();
+        private static readonly Dictionary<PlayerState, Vector3> PrevPosition = new Dictionary<PlayerState, Vector3>();
+        private static readonly Dictionary<PlayerState, int> SpeedDetections = new Dictionary<PlayerState, int>();
+        private static readonly Dictionary<PlayerState, int> PositionViolations = new Dictionary<PlayerState, int>();
         private static float SpeedTimer;
+        private static float _checkTimer = 0f;
 
         internal static void Update()
         {
@@ -58,6 +58,7 @@ namespace AntiCheat.Managers.AntiCheat
 
         private static void CheckPlayers()
         {
+            if (!Settings.IsHost || !Settings.AntiCheatEnabled) return;
             foreach (PlayerState player in GameReferences.Spawn!.ActivePlayerStates)
             {
                 if (player == null || !player.IsConnected || !player.IsSpawned || string.IsNullOrEmpty(player.PlayerModerationID.Value)) continue;
@@ -73,41 +74,60 @@ namespace AntiCheat.Managers.AntiCheat
 
         private static void CheckSpeed()
         {
-            SpeedTimer += Time.deltaTime;
-
-            if (SpeedTimer < 1f || GameReferences.Spawn == null)
+            if (!Settings.IsHost || !Settings.AntiCheatEnabled || GameReferences.Spawn == null)
+            {
+                SpeedTimer = 0f;
+                PrevPosition.Clear();
+                SpeedDetections.Clear();
                 return;
+            }
 
+            SpeedTimer += Time.unscaledDeltaTime;
+            if (SpeedTimer < 0.5f) return;
+
+            float elapsed = SpeedTimer;
             SpeedTimer = 0f;
 
-            foreach (PlayerState Player in GameReferences.Spawn.ActivePlayerStates)
+            if (elapsed > 1f)
             {
-                if (Player == null || !Player.IsConnected || !Player.IsSpawned)
-                    continue;
+                PrevPosition.Clear();
+                SpeedDetections.Clear();
+                return;
+            }
 
-                Vector3 Position = Player.LocomotionPlayer.NetworkRigidbody.Rigidbody.position;
+            float limit = 9.5f * elapsed + 0.5f;
 
-                if (PrevPosition.TryGetValue(Player, out Vector3 LastPosition))
+            foreach (PlayerState player in GameReferences.Spawn.ActivePlayerStates)
+            {
+                if (player == null) continue;
+
+                var body = player.LocomotionPlayer?.NetworkRigidbody?.Rigidbody;
+                if (!player.IsConnected || !player.IsSpawned || body == null)
                 {
-                    float Speed = Vector3.Distance(Position, LastPosition);
-
-                    if (Speed > 9.5f)
-                    {
-                        SpeedDetections.TryGetValue(Player, out int Detections);
-
-                        if (++Detections >= 4)
-                        {
-                            Detected(Player, "Speed Hacks Detected");
-                            Detections = 0;
-                        }
-
-                        SpeedDetections[Player] = Detections;
-                    }
-                    else
-                        SpeedDetections[Player] = 0;
+                    PrevPosition.Remove(player);
+                    SpeedDetections.Remove(player);
+                    continue;
                 }
 
-                PrevPosition[Player] = Position;
+                Vector3 position = body.position;
+                bool tracked = PrevPosition.TryGetValue(player, out Vector3 previous);
+                PrevPosition[player] = position;
+
+                if (!tracked || (position - previous).sqrMagnitude <= limit * limit)
+                {
+                    SpeedDetections.Remove(player);
+                    continue;
+                }
+
+                SpeedDetections.TryGetValue(player, out int violations);
+                if (++violations < 4)
+                {
+                    SpeedDetections[player] = violations;
+                    continue;
+                }
+
+                SpeedDetections.Remove(player);
+                Detected(player, "Speed Hacks Detected");
             }
         }
 
@@ -203,7 +223,6 @@ namespace AntiCheat.Managers.AntiCheat
             return true;
         }
 
-
         internal static bool VerifyMeeting(PlayerState caller, ref RpcInfo info)
         {
             if (caller == null)
@@ -214,10 +233,11 @@ namespace AntiCheat.Managers.AntiCheat
 
             PlayerState InfoCaller = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
-            if (InfoCaller == null)
+            if (InfoCaller == null || InfoCaller != caller)
                 return false;
 
-            if (InfoCaller != caller)
+            if (!GameReferences.GameState!.InTaskState() ||
+                GameReferences.GameState.GameModeStateValue.GameMode == GameModes.Infection)
                 return false;
 
             MeetingsCalled.TryGetValue(info.Source.PlayerId, out int called);
@@ -225,15 +245,11 @@ namespace AntiCheat.Managers.AntiCheat
             if (called >= GameReferences.Button!._maxAllowedCalls)
                 return false;
 
-
-            if ((caller.LocomotionPlayer.RigidbodyPosition - GameReferences.Button._buttonCollider.transform.position).sqrMagnitude > 5f)
+            if ((caller.LocomotionPlayer.RigidbodyPosition -
+                 GameReferences.Button._buttonCollider.transform.position).sqrMagnitude > 5f)
                 return false;
 
             MeetingsCalled[info.Source.PlayerId] = called + 1;
-
-            if (!GameReferences.GameState!.InTaskState() || GameReferences.GameState.GameModeStateValue.GameMode == GameModes.Infection)
-                return false;
-
             return true;
         }
 
@@ -425,12 +441,11 @@ namespace AntiCheat.Managers.AntiCheat
 
         internal static bool VerifyVentEnter(NetworkedLocomotionPlayer player)
         {
-            if (player == null)
-                return false;
+            if (player == null) return false;
 
             GameRole VenterRole = Commands.GetPlayerRole(player.PState.PlayerId);
 
-            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps == PowerUps.CanVent)
+            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps != PowerUps.CanVent)
                 return false;
 
             return true;
@@ -438,20 +453,20 @@ namespace AntiCheat.Managers.AntiCheat
 
         internal static bool VerifyVentExit(NetworkedLocomotionPlayer player)
         {
-            GameRole VenterRole = Commands.GetPlayerRole(player.PState.PlayerId);
-
             if (player == null) return false;
 
-            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps == PowerUps.CanVent)
+            GameRole VenterRole = Commands.GetPlayerRole(player.PState.PlayerId);
+
+            if (VenterRole != GameRole.Impostor && VenterRole != GameRole.Engineer && player.PState.ActivePowerUps != PowerUps.CanVent)
                 return false;
             return true;
         }
 
         internal static bool VerifyUsePowerup(PlayerState player)
         {
-            GameRole Role = Commands.GetPlayerRole(player.PlayerId);
-
             if (player == null) return false;
+
+            GameRole Role = Commands.GetPlayerRole(player.PlayerId);
 
             if (!GameReferences.GameState!.InTaskState() || GameReferences.GameState!.GameModeStateValue.GameMode != GameModes.Infection || Role == GameRole.Infected || player.ActivePowerUps == PowerUps.None)
                 return false;
@@ -460,8 +475,7 @@ namespace AntiCheat.Managers.AntiCheat
 
         internal static bool VerifyTaskComplete(PlayerState player)
         {
-            if (player == null)
-                return false;
+            if (player == null) return false;
 
             GameRole Role = Commands.GetPlayerRole(player.PlayerId);
 

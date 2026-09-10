@@ -10,6 +10,8 @@ namespace AntiCheat
 {
     public class Main : MelonMod
     {
+        private float ReferenceTimer;
+
         public override void OnInitializeMelon()
         {
 #if DEBUG
@@ -26,7 +28,7 @@ namespace AntiCheat
         {
             Settings.InGame = sceneName != "Boot" && sceneName != "Title";
             AntiCheatMain.ResetAntiCheat(true);
-
+            ReferenceTimer = 0f;
             Logger.DebugMsg($"Scene {sceneName}");
         }
 
@@ -40,8 +42,20 @@ namespace AntiCheat
             if (Keyboard.current.leftCtrlKey.wasPressedThisFrame)
                 Settings.GUIEnabled = !Settings.GUIEnabled;
 
-            if (Settings.InGame && GameReferences.Rig == null) GameReferences.ResetReferences();
+            if (Settings.InGame)
+            {
+                ReferenceTimer -= UnityEngine.Time.unscaledDeltaTime;
 
+                if (ReferenceTimer <= 0f)
+                {
+                    ReferenceTimer = 1f;
+                    GameReferences.ResetReferences();
+                }
+            }
+            else
+            {
+                ReferenceTimer = 0f;
+            }
             AntiCheatMain.Update();
         }
     }
@@ -65,6 +79,7 @@ namespace AntiCheat
  * Venting verification
  * Wardrobe enter verification
  * Use Powerup verification
+ * Speed Hack detection
  * Task completion verification
  * Lobby Door toggle verification
 */

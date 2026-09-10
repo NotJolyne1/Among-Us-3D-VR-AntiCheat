@@ -15,12 +15,14 @@ namespace AntiCheat.Managers
     {
         private static readonly HashSet<string> WhitelistedPlayers = new HashSet<string>();
         private static readonly HashSet<string> BlacklistedPlayers = new HashSet<string>();
+        private static bool DoorCorrectionPending;
 
         internal static void KickPlayerViaAntiCheat(int player, string reason, bool blacklist)
         {
             if (Settings.IsHost)
             {
-                if (blacklist) BlacklistPlayer(Helpers.GetPlayerstateFromID(player));
+                if (blacklist)
+                    BlacklistPlayer(Helpers.GetPlayerstateFromID(player), kick: false);
                 MelonCoroutines.Start(QueueKick(player));
             }
         }
@@ -48,72 +50,65 @@ namespace AntiCheat.Managers
 
         public static bool IsWhitelisted(this PlayerState player)
         {
-            if (Settings.IsHost && player != null)
-            {
-                string UserId = Hash(GameReferences.Runner!.GetPlayerUserId(player.PlayerId));
-                string HashedId = Hash(UserId);
-                return WhitelistedPlayers.Contains(HashedId);
-            }
-            return false;
+            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+                return false;
+
+            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
+            return !string.IsNullOrEmpty(userId)
+                && WhitelistedPlayers.Contains(Hash(userId));
         }
 
         public static bool IsBlacklisted(this PlayerState player)
         {
-            if (Settings.IsHost && player != null)
-            {
-                string UserId = Hash(GameReferences.Runner!.GetPlayerUserId(player.PlayerId));
-                string HashedId = Hash(UserId);
-                return BlacklistedPlayers.Contains(HashedId);
-            }
-            return false;
-        }
+            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+                return false;
 
+            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
+            return !string.IsNullOrEmpty(userId)
+                && BlacklistedPlayers.Contains(Hash(userId));
+        }
 
         public static void WhitelistPlayer(PlayerState player)
         {
-            if (Settings.IsHost && player != null)
-            {
-                string UserId = Hash(GameReferences.Runner!.GetPlayerUserId(player.PlayerId));
-                string HashedId = Hash(UserId);
+            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+                return;
 
-                if (!string.IsNullOrEmpty(HashedId))
-                {
-                    WhitelistedPlayers.Add(HashedId);
-                    BlacklistedPlayers.Remove(HashedId);
-                }
-            }
+            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
+            if (string.IsNullOrEmpty(userId))
+                return;
+
+            string hashedId = Hash(userId);
+            WhitelistedPlayers.Add(hashedId);
+            BlacklistedPlayers.Remove(hashedId);
         }
 
         public static void UnwhitelistPlayer(PlayerState player)
         {
-            if (Settings.IsHost && player != null && GameReferences.Runner != null)
-            {
-                string UserId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
-                string HashedId = Hash(UserId);
+            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+                return;
 
-                if (!string.IsNullOrEmpty(HashedId))
-                {
-                    WhitelistedPlayers.Remove(HashedId);
-                }
-            }
+            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
+            if (string.IsNullOrEmpty(userId))
+                return;
+
+            WhitelistedPlayers.Remove(Hash(userId));
         }
 
-
-        public static void BlacklistPlayer(PlayerState player)
+        public static void BlacklistPlayer(PlayerState player, bool kick = true)
         {
-            if (Settings.IsHost && player != null)
-            {
-                string UserId = Hash(GameReferences.Runner!.GetPlayerUserId(player.PlayerId));
-                string HashedId = Hash(UserId);
+            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+                return;
 
-                if (!string.IsNullOrEmpty(HashedId))
-                {
-                    BlacklistedPlayers.Add(HashedId);
-                    WhitelistedPlayers.Remove(HashedId);
+            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
+            if (string.IsNullOrEmpty(userId))
+                return;
 
-                    KickPlayerViaAntiCheat(player.PlayerId, "Player is on blacklist", false);
-                }
-            }
+            string hashedId = Hash(userId);
+            BlacklistedPlayers.Add(hashedId);
+            WhitelistedPlayers.Remove(hashedId);
+
+            if (kick)
+                KickPlayerViaAntiCheat(player.PlayerId, "Player is on blacklist", false);
         }
 
 
@@ -127,11 +122,25 @@ namespace AntiCheat.Managers
             return GameRole.NotSet;
         }
 
-        internal static IEnumerator CorrectLobbyDoors(GameStateManager manager, bool status)
+        internal static IEnumerator CorrectLobbyDoors(GameStateManager manager)
         {
-            yield return new WaitForEndOfFrame();
-            yield return new WaitForSeconds(0.35f);
-            manager.RPC_ToggleLobbyDoors(!status);
+            if (DoorCorrectionPending) yield break;
+            DoorCorrectionPending = true;
+
+            try
+            {
+                yield return new WaitForSeconds(0.35f);
+
+                if (manager == null || !Settings.IsHost || !Settings.AntiCheatEnabled)
+                    yield break;
+
+                bool close = manager.InLobbyState() || manager.InVotingState();
+                manager.RPC_ToggleLobbyDoors(close);
+            }
+            finally
+            {
+                DoorCorrectionPending = false;
+            }
         }
     }
 }

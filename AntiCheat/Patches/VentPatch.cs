@@ -23,7 +23,7 @@ public static class EnterVentPatch
     }
 }
 
-[HarmonyPatch(typeof(NetworkedLocomotionPlayer), nameof(NetworkedLocomotionPlayer.RPC_EnterVent))]
+[HarmonyPatch(typeof(NetworkedLocomotionPlayer), nameof(NetworkedLocomotionPlayer.RPC_ExitVent))]
 public static class ExitVentPatch
 {
     [HarmonyPrefix]

@@ -25,7 +25,7 @@ public static class TargetedActionPatch
             if (action == (int)ProximityTargetedAction.Infect)
                 return AntiCheatMain.VerifyInfect(killer, victim);
 
-            if (action == (int)ProximityTargetedAction.Infect)
+            if (action == (int)ProximityTargetedAction.Vote)
                 return AntiCheatMain.VerifyDeputyVote(killer, victim);
         }
 

@@ -1,6 +1,8 @@
 ﻿using AntiCheat.Config;
+using AntiCheat.Managers;
 using HarmonyLib;
 using Il2CppFusion;
+using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Network;
 using Il2CppSystem.IO;
 using MelonLoader;
@@ -9,50 +11,77 @@ using UnityEngine;
 [HarmonyPatch(typeof(GlobalRPCCaller), nameof(GlobalRPCCaller.Play), new Type[] { })]
 public static class CameraPlayPatch
 {
-    static readonly List<float> Clicks = new();
-    static float BlockedUntil;
+    internal static readonly List<float> PhotosTaken = new();
+    private static float BlockedUntil;
 
     [HarmonyPrefix]
     public static bool Prefix(GlobalRPCCaller __instance)
     {
 
-        if (!Settings.IsHost || !Settings.AntiCheatEnabled) return false;
+        if (!Settings.IsHost || !Settings.AntiCheatEnabled) return true;
 
         var obj = GameObject.Find("InteractionComponents");
         if (obj == null || obj.GetComponent<GlobalRPCCaller>() != __instance) return true;
 
         float now = Time.realtimeSinceStartup;
-        if (now < BlockedUntil) return false;
+        bool blocked = now < BlockedUntil;
+
+        if (blocked) BlockedUntil = now + 1f;
 
         if (!GameReferences.GameState!.InLobbyState())
         {
             MelonLogger.Warning("Someone in your lobby is cheating! Reason: TakePhoto called while game started");
         }
 
-        Clicks.RemoveAll(x => now - x > 1f);
-        Clicks.Add(now);
+        PhotosTaken.RemoveAll(x => now - x > 1f);
+        PhotosTaken.Add(now);
 
-        if (Clicks.Count < 5) return true;
+        if (PhotosTaken.Count < 5) return !blocked;
 
-        Clicks.Clear();
-        BlockedUntil = now + 10f;
+        BlockedUntil = now + 1f;
+        PhotosTaken.Clear();
 
-        var steam = new List<PlayerRef>();
+        var SteamPlayers = new List<PlayerState>();
 
-        foreach (var player in GameReferences.Runner!.ActivePlayers.ToArray())
+        if (GameReferences.Spawn == null || GameReferences.Runner == null)
+            GameReferences.ResetReferences();
+
+        var runner = GameReferences.Runner;
+        var spawn = GameReferences.Spawn;
+
+        if (runner == null || spawn == null)
         {
-            if (player != GameReferences.Runner.LocalPlayer &&
-                GameReferences.Runner.GetPlayerUserId(player).StartsWith("Steam_"))
-                steam.Add(player);
+            MelonLogger.Warning("[ANTI-CRASH] Cannot disconnect players: missing game references.");
+            return false;
         }
 
-        if (steam.Count <= 4)
+        foreach (PlayerState player in spawn.ActivePlayerStates)
         {
-            MelonLogger.Warning($"Kicking {steam.Count} Unwhitelisted Steam players because one of them was attempting to crash everyones game");
+            if (player == null) continue;
 
-            foreach (var player in steam)
-                GameReferences.Runner.Disconnect(player);
+            try
+            {
+                if (!player.IsConnected || player.PlayerId == runner.LocalPlayer.PlayerId) continue;
+
+                string userId = runner.GetPlayerUserId(player.PlayerId);
+
+                if (!string.IsNullOrEmpty(userId) && userId.StartsWith("Steam_") && !player.IsWhitelisted())
+                {
+                    SteamPlayers.Add(player);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                MelonLogger.Warning($"[ANTI-CRASH] Could not check a player: {ex.Message}");
+            }
         }
+
+        MelonLogger.Warning($"[ANTI-CRASH] Kicking {SteamPlayers.Count} Unwhitelisted Steam players because one of them was attempting to crash everyones game");
+        MelonLogger.Warning($"[ANTI-CRASH] While some of these players may have been innocent, it would have resulted in your game being crashed.");
+
+        foreach (PlayerState player in SteamPlayers)
+            GameReferences.Runner!.Disconnect(player.PlayerId);
+
 
         return false;
     }

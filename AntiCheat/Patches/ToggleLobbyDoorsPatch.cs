@@ -17,7 +17,7 @@ public static class ToggleLobbyDoorsPatch
             if (!AntiCheatMain.VerifyToggleLobbyDoors(__instance, close))
             {
                 MelonLogger.Warning("Someone in your lobby is cheating. Reason: Lobby doors illegally toggled");
-                MelonCoroutines.Start(Commands.CorrectLobbyDoors(__instance, close));
+                MelonCoroutines.Start(Commands.CorrectLobbyDoors(__instance));
             }
         }
     }
