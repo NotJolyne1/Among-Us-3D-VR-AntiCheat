@@ -9,7 +9,7 @@ using UnityEngine;
 [HarmonyPatch(typeof(ModerationManager), nameof(ModerationManager.RPC_KickVote))]
 public static class KickVotePatch
 {
-    static readonly Dictionary<int, List<(int Source, float Time)>> Recent = new();
+    internal static readonly Dictionary<int, List<(int Source, float Time)>> RecentKickVotes = new();
 
     [HarmonyPrefix]
     public static bool Prefix(ModerationManager __instance, int sourcePlayer, int kickPlayer)
@@ -23,7 +23,7 @@ public static class KickVotePatch
         }
 
         float now = Time.realtimeSinceStartup;
-        if (!Recent.TryGetValue(kickPlayer, out var recent)) Recent[kickPlayer] = recent = new();
+        if (!RecentKickVotes.TryGetValue(kickPlayer, out var recent)) RecentKickVotes[kickPlayer] = recent = new();
 
         recent.RemoveAll(x => now - x.Time > .55f);
         recent.Add((sourcePlayer, now));

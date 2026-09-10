@@ -2,6 +2,7 @@
 using Il2CppFusion;
 using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Roles;
+using MelonLoader;
 using System.Collections;
 using System.Security.Cryptography;
 using System.Text;
@@ -20,10 +21,18 @@ namespace AntiCheat.Managers
             if (Settings.IsHost)
             {
                 if (blacklist) BlacklistPlayer(Helpers.GetPlayerstateFromID(player));
-                GameReferences.Runner?.Disconnect(player);
+                MelonCoroutines.Start(QueueKick(player));
             }
         }
 
+        private static IEnumerator QueueKick(int cheater)
+        {
+            yield return new WaitForEndOfFrame();
+            if (GameReferences.Moderation == null) GameReferences.ResetReferences();
+            GameReferences.Moderation!.RPC_KickPlayer(cheater);
+            yield return new WaitForSeconds(0.25f);
+            if (((PlayerRef)cheater).IsValid) GameReferences.Runner!.Disconnect(cheater);
+        }
 
         internal static string Hash(string text)
         {

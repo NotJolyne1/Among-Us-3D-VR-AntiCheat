@@ -114,7 +114,7 @@ namespace AntiCheat.Managers.AntiCheat
 
 
 
-        internal static void ResetAntiCheat()
+        internal static void ResetAntiCheat(bool sceneReset = false)
         {
             Logger.DebugMsg("Resetting Anti-Cheat");
             MeetingsCalled.Clear();
@@ -123,6 +123,7 @@ namespace AntiCheat.Managers.AntiCheat
             PrevPosition.Clear();
             FailedSpeedAttempts.Clear();
             CompleteTaskPatch.Tasks.Clear();
+            KickVotePatch.RecentKickVotes.Clear();
             SpeedTimer = 0f;
         }
 

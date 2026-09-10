@@ -23,6 +23,7 @@ namespace AntiCheat.Config
         internal static EmergencyButton? Button;
         internal static VoteManager? Vote;
         internal static CustomizationManager? Customization;
+        internal static ModerationManager? Moderation;
 
 
         public static void ResetReferences()
@@ -37,6 +38,7 @@ namespace AntiCheat.Config
             Button = null;
             Vote = null;
             Customization = null;
+            Moderation = null;
 
             Runner = FindObjectOfType<NetworkRunner>();
             Spawn = FindObjectOfType<SpawnManager>();
@@ -48,6 +50,7 @@ namespace AntiCheat.Config
             Button = FindObjectOfType<EmergencyButton>();
             Vote = FindObjectOfType<VoteManager>();
             Customization = FindObjectOfType<CustomizationManager>();
+            Moderation = FindObjectOfType<ModerationManager>();
             Logger.DebugMsg("Game references reset");
         }
     }

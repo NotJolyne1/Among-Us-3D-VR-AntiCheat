@@ -17,6 +17,7 @@ namespace AntiCheat
 #else
             Settings.DebugMode = false;
 #endif
+            AntiCheatMain.ResetAntiCheat(true);
             Logger.Msg("Anti-Cheat loaded");
         }
 
@@ -24,7 +25,7 @@ namespace AntiCheat
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
             Settings.InGame = sceneName != "Boot" && sceneName != "Title";
-            AntiCheatMain.ResetAntiCheat();
+            AntiCheatMain.ResetAntiCheat(true);
 
             Logger.DebugMsg($"Scene {sceneName}");
         }
@@ -46,7 +47,9 @@ namespace AntiCheat
     }
 }
 
-/*
+/* done
+ *
+ * Kicks cheaters with anti kick
  * Kill verification
  * Infect verification
  * SheriffVote verification
