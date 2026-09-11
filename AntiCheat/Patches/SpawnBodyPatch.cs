@@ -16,12 +16,19 @@ public static class SpawnBodyPatch
         {
             if (!AntiCheatMain.VerifyBodySpawn(id, rb))
             {
-                foreach (NetworkedBody body in __instance.NetworkedBodies)
+                if (__instance?.NetworkedBodies != null)
                 {
-                    if (body._playerState.LocomotionPlayer.NetworkRigidbody == rb || body._playerState.PlayerId == id.PlayerId)
-                        body?.RPC_ToggleBody(false);
+                    foreach (NetworkedBody Body in __instance.NetworkedBodies)
+                    {
+                        if (Body?._playerState == null)
+                            continue;
+
+                        if (Body._playerState.PlayerId == id.PlayerId)
+                            Body.RPC_ToggleBody(false);
+                    }
                 }
-                MelonLogger.Warning($"Body despawned cheater");
+
+                MelonLogger.Warning("Body despawned cheater");
             }
         }
     }

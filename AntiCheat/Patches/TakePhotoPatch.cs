@@ -50,10 +50,7 @@ public static class CameraPlayPatch
         var spawn = GameReferences.Spawn;
 
         if (runner == null || spawn == null)
-        {
-            MelonLogger.Warning("[ANTI-CRASH] Cannot disconnect players: missing game references.");
             return false;
-        }
 
         foreach (PlayerState player in spawn.ActivePlayerStates)
         {

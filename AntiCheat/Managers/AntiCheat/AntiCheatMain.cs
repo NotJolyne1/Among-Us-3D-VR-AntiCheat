@@ -190,7 +190,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (VictimRole == GameRole.Impostor || VictimRole == GameRole.Revenger)
                 return false;
 
-            if ((killer.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+            if ((killer.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 10f)
                 return false;
 
             if (killer.ActionCooldownRemaining > 0.1f)
@@ -224,7 +224,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (TaggerRole != GameRole.Infected)
                 return false;
 
-            if ((tagger.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+            if ((tagger.LocomotionPlayer.RigidbodyPosition - victim.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 10f)
                 return false;
 
             if (tagger.ActionCooldownRemaining > 0.1f)
@@ -262,7 +262,7 @@ namespace AntiCheat.Managers.AntiCheat
                 return false;
 
             if ((caller.LocomotionPlayer.RigidbodyPosition -
-                 GameReferences.Button._buttonCollider.transform.position).sqrMagnitude > 5f)
+                 GameReferences.Button._buttonCollider.transform.position).sqrMagnitude > 15f)
                 return false;
 
             MeetingsCalled[info.Source.PlayerId] = called + 1;
@@ -293,7 +293,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (body == null || !body._playerBody.active)
                 return false;
 
-            if ((caller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).sqrMagnitude > 5f)
+            if ((caller.LocomotionPlayer.RigidbodyPosition - body._playerBody.transform.position).sqrMagnitude > 13f)
                 return false;
 
             if (GameReferences.GameState!.GameModeStateValue.GameMode == GameModes.Infection)
@@ -435,7 +435,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (GameReferences.Vote!.SheriffId != deputy.PlayerId || Commands.GetPlayerRole(deputy.PlayerId) != GameRole.Sheriff)
                 return false;
 
-            if ((deputy.LocomotionPlayer.RigidbodyPosition - voted.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+            if ((deputy.LocomotionPlayer.RigidbodyPosition - voted.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 10f)
                 return false;
 
             return true;
@@ -534,7 +534,7 @@ namespace AntiCheat.Managers.AntiCheat
             GameRole PowerUserRole = Commands.GetPlayerRole(player.PlayerId);
             GameRole TargetRole = Commands.GetPlayerRole(target.PlayerId);
 
-            if ((player.LocomotionPlayer.RigidbodyPosition - target.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+            if ((player.LocomotionPlayer.RigidbodyPosition - target.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 10f)
                 return false;
 
             switch (powerUp)

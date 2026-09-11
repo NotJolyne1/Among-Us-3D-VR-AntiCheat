@@ -9,8 +9,16 @@ using MelonLoader;
 public static class ResetTaskProgressPatch
 {
     [HarmonyPrefix]
-    public static void Prefix()
+    public static bool Prefix()
     {
-        MelonLogger.Warning($"TASK RESET");
+        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        {
+            if (!GameReferences.GameState!.InLobbyState() && !GameReferences.Cutscene!._isEndGame)
+            {
+                MelonLogger.Warning("Someone in your lobby is cheating! Reason: Illegal call of ResetTaskProgress");
+                return false;
+            }
+        }
+        return true;
     }
 }
