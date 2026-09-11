@@ -15,6 +15,7 @@ namespace AntiCheat.Managers
     {
         private static readonly HashSet<string> WhitelistedPlayers = new HashSet<string>();
         private static readonly HashSet<string> BlacklistedPlayers = new HashSet<string>();
+        private static readonly HashSet<string> GloballyBlacklistedPlayers = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         private static bool DoorCorrectionPending;
 
         internal static void KickPlayerViaAntiCheat(int player, string reason, bool blacklist)
@@ -36,17 +37,35 @@ namespace AntiCheat.Managers
             if (((PlayerRef)cheater).IsValid) GameReferences.Runner!.Disconnect(cheater);
         }
 
-        internal static string Hash(string text)
-        {
-            if (string.IsNullOrEmpty(text)) return string.Empty;
 
-            using (SHA256 sha256 = SHA256.Create())
+        internal static async void FetchGlobalBlacklist()
+        {
+            GloballyBlacklistedPlayers.Clear();
+
+            try
             {
-                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(text));
-                return Convert.ToHexString(bytes);
+                using (var Client = new System.Net.Http.HttpClient())
+                {
+                    string Data = await Client.GetStringAsync("https://jolynesbackend.xyz/anticheat/blacklistedusers");
+
+                    foreach (string UserId in Data.Split(','))
+                    {
+                        string PlayerId = UserId.Trim();
+                        if (!string.IsNullOrEmpty(PlayerId)) GloballyBlacklistedPlayers.Add(PlayerId);
+                    }
+                }
             }
+            catch { }
         }
 
+
+        internal static string Hash(string Text)
+        {
+            if (string.IsNullOrEmpty(Text)) return string.Empty;
+
+            using (SHA256 Sha256 = SHA256.Create())
+                return Convert.ToHexString(Sha256.ComputeHash(Encoding.UTF8.GetBytes(Text))).ToLowerInvariant();
+        }
 
         public static bool IsWhitelisted(this PlayerState player)
         {
@@ -54,18 +73,17 @@ namespace AntiCheat.Managers
                 return false;
 
             string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
-            return !string.IsNullOrEmpty(userId)
-                && WhitelistedPlayers.Contains(Hash(userId));
+            return !string.IsNullOrEmpty(userId) && WhitelistedPlayers.Contains(Hash(userId));
         }
 
-        public static bool IsBlacklisted(this PlayerState player)
+        public static bool IsBlacklisted(this PlayerState Player)
         {
-            if (!Settings.IsHost || player == null || GameReferences.Runner == null)
+            if (!Settings.IsHost || Player == null || GameReferences.Runner == null)
                 return false;
 
-            string userId = GameReferences.Runner.GetPlayerUserId(player.PlayerId);
-            return !string.IsNullOrEmpty(userId)
-                && BlacklistedPlayers.Contains(Hash(userId));
+            string UserId = GameReferences.Runner.GetPlayerUserId(Player.PlayerId);
+
+            return !string.IsNullOrEmpty(UserId) && (BlacklistedPlayers.Contains(Hash(UserId)) || GloballyBlacklistedPlayers.Contains(Hash(UserId)));
         }
 
         public static void WhitelistPlayer(PlayerState player)

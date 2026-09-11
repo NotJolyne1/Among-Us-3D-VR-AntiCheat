@@ -61,7 +61,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (!Settings.IsHost || !Settings.AntiCheatEnabled) return;
             foreach (PlayerState player in GameReferences.Spawn!.ActivePlayerStates)
             {
-                if (player == null || !player.IsConnected || !player.IsSpawned || string.IsNullOrEmpty(player.PlayerModerationID.Value)) continue;
+                if (player == null || !player.IsConnected || !player.IsSpawned) continue;
 
                 if (player.IsBlacklisted() && !player.IsWhitelisted()) Detected(player, "Player is on the blacklist");
                 if (player.HatId == 98) Detected(player, "Illegal cosmetics");
@@ -145,6 +145,11 @@ namespace AntiCheat.Managers.AntiCheat
             CompleteTaskPatch.Tasks.Clear();
             KickVotePatch.RecentKickVotes.Clear();
             SpeedTimer = 0f;
+
+            if (sceneReset)
+            {
+                Commands.FetchGlobalBlacklist();
+            }
         }
 
         internal static void Detected(PlayerState cheater, string reason)
