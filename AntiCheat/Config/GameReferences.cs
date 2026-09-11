@@ -2,6 +2,7 @@
 using Il2CppFusion;
 using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Customization;
+using Il2CppSG.Airlock.Cutscenes;
 using Il2CppSG.Airlock.Network;
 using Il2CppSG.Airlock.Roles;
 using Il2CppSG.Airlock.Sabotage;
@@ -26,6 +27,7 @@ namespace AntiCheat.Config
         internal static CustomizationManager? Customization;
         internal static ModerationManager? Moderation;
         internal static SabotageManager? Sabotage;
+        internal static CutsceneManager? Cutscene;
 
 
         public static void ResetReferences()
@@ -42,6 +44,7 @@ namespace AntiCheat.Config
             Customization = null;
             Moderation = null;
             Sabotage = null;
+            Cutscene = null;
 
             Runner = FindObjectOfType<NetworkRunner>();
             Spawn = FindObjectOfType<SpawnManager>();
@@ -55,6 +58,7 @@ namespace AntiCheat.Config
             Customization = FindObjectOfType<CustomizationManager>();
             Moderation = FindObjectOfType<ModerationManager>();
             Sabotage = FindObjectOfType<SabotageManager>();
+            Cutscene = FindObjectOfType<CutsceneManager>();
             Logger.DebugMsg("Game references reset");
         }
     }
