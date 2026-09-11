@@ -4,6 +4,7 @@ using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Customization;
 using Il2CppSG.Airlock.Network;
 using Il2CppSG.Airlock.Roles;
+using Il2CppSG.Airlock.Sabotage;
 using Il2CppSG.Airlock.UI;
 using Il2CppSG.Airlock.XR;
 using MelonLoader;
@@ -24,6 +25,7 @@ namespace AntiCheat.Config
         internal static VoteManager? Vote;
         internal static CustomizationManager? Customization;
         internal static ModerationManager? Moderation;
+        internal static SabotageManager? Sabotage;
 
 
         public static void ResetReferences()
@@ -39,6 +41,7 @@ namespace AntiCheat.Config
             Vote = null;
             Customization = null;
             Moderation = null;
+            Sabotage = null;
 
             Runner = FindObjectOfType<NetworkRunner>();
             Spawn = FindObjectOfType<SpawnManager>();
@@ -51,6 +54,7 @@ namespace AntiCheat.Config
             Vote = FindObjectOfType<VoteManager>();
             Customization = FindObjectOfType<CustomizationManager>();
             Moderation = FindObjectOfType<ModerationManager>();
+            Sabotage = FindObjectOfType<SabotageManager>();
             Logger.DebugMsg("Game references reset");
         }
     }

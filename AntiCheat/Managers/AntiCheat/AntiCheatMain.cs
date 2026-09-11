@@ -16,6 +16,7 @@ namespace AntiCheat.Managers.AntiCheat
         private static readonly Dictionary<PlayerState, Vector3> PrevPosition = new Dictionary<PlayerState, Vector3>();
         private static readonly Dictionary<PlayerState, int> SpeedDetections = new Dictionary<PlayerState, int>();
         private static readonly Dictionary<PlayerState, int> PositionViolations = new Dictionary<PlayerState, int>();
+        private static readonly HashSet<int> AllowedBodySpawns = new HashSet<int>();
         private static float SpeedTimer;
         private static float _checkTimer = 0f;
 
@@ -142,6 +143,7 @@ namespace AntiCheat.Managers.AntiCheat
             SpeedDetections.Clear();
             PrevPosition.Clear();
             FailedSpeedAttempts.Clear();
+            AllowedBodySpawns.Clear();
             CompleteTaskPatch.Tasks.Clear();
             KickVotePatch.RecentKickVotes.Clear();
             SpeedTimer = 0f;
@@ -194,6 +196,9 @@ namespace AntiCheat.Managers.AntiCheat
             if (killer.ActionCooldownRemaining > 0.1f)
                 return false;
 
+            if (!AllowedBodySpawns.Contains(victim.PlayerId))
+                AllowedBodySpawns.Add(victim.PlayerId);
+  
             return true;
         }
 
@@ -241,6 +246,12 @@ namespace AntiCheat.Managers.AntiCheat
             if (InfoCaller == null || InfoCaller != caller)
                 return false;
 
+            if (!caller.IsAlive)
+                return false;
+
+            if (GameReferences.Sabotage!.ActiveSabotageIndex != -1)
+                return false;
+
             if (!GameReferences.GameState!.InTaskState() ||
                 GameReferences.GameState.GameModeStateValue.GameMode == GameModes.Infection)
                 return false;
@@ -271,7 +282,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (InfoCaller == null || InfoCaller != caller)
                 return false;
 
-            if (reported.IsAlive)
+            if (reported.IsAlive || !caller.IsAlive)
                 return false;
 
             if (!GameReferences.Spawn!._playerIdToBody.TryGetValue(reported.PlayerId, out var BodyObj))
@@ -295,22 +306,23 @@ namespace AntiCheat.Managers.AntiCheat
         }
 
 
-        internal static bool VerifyBodySpawn(NetworkedBody body)
+        internal static bool VerifyBodySpawn(PlayerRef player, NetworkRigidbody rigidbody)
         {
             if (GameReferences.Spawn == null)
                 return false;
 
-            if (body == null)
+            PlayerState BodyPState = Helpers.GetPlayerstateFromID(player.PlayerId);
+
+            if (!player.IsValid)
                 return false;
 
-            if (body._playerState == null)
+            if (BodyPState == null)
                 return false;
 
-            if (body._playerBody == null)
+            if (rigidbody != BodyPState.LocomotionPlayer.NetworkRigidbody)
                 return false;
 
-
-            if (body._playerState.IsAlive)
+            if (BodyPState.IsAlive)
                 return false;
 
             if (GameReferences.GameState == null)
@@ -322,6 +334,12 @@ namespace AntiCheat.Managers.AntiCheat
             if (!GameReferences.GameState.InTaskState())
                 return false;
 
+            if (!AllowedBodySpawns.Contains(BodyPState.PlayerId))
+            {
+                MelonLogger.Warning("Not in hashset");
+                return false;
+            }
+            AllowedBodySpawns.Remove(BodyPState.PlayerId);
             return true;
         }
 
@@ -417,6 +435,9 @@ namespace AntiCheat.Managers.AntiCheat
             if (GameReferences.Vote!.SheriffId != deputy.PlayerId || Commands.GetPlayerRole(deputy.PlayerId) != GameRole.Sheriff)
                 return false;
 
+            if ((deputy.LocomotionPlayer.RigidbodyPosition - voted.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+                return false;
+
             return true;
         }
 
@@ -502,6 +523,49 @@ namespace AntiCheat.Managers.AntiCheat
             else
             {
                 if (instance.InLobbyState() || instance.InVotingState()) return false;
+            }
+            return true;
+        }
+
+
+        internal static bool VerifyPowerup(PlayerState player, PlayerState target, PowerUps powerUp)
+        {
+            if (player == null || target == null) return false;
+            GameRole PowerUserRole = Commands.GetPlayerRole(player.PlayerId);
+            GameRole TargetRole = Commands.GetPlayerRole(target.PlayerId);
+
+            if ((player.LocomotionPlayer.RigidbodyPosition - target.LocomotionPlayer.RigidbodyPosition).sqrMagnitude > 5f)
+                return false;
+
+            switch (powerUp)
+            {
+                case PowerUps.Stun:
+                    {
+                        if (player.ActivePowerUps != PowerUps.Stun) return false;
+
+                        if (GameReferences.GameState!.GameModeStateValue.GameMode != GameModes.Infection)
+                            return false;
+
+                        if (PowerUserRole != GameRole.Crewmember || TargetRole != GameRole.Infected)
+                            return false;
+
+                        if (!GameReferences.GameState.InTaskState())
+                            return false;
+                    }
+                    break;
+
+                case PowerUps.Guard:
+                    {
+                        if (GameReferences.GameState!.GameModeStateValue.GameMode == GameModes.Infection && player.ActivePowerUps != PowerUps.Guard)
+                            return false;
+
+                        if (GameReferences.GameState!.GameModeStateValue.GameMode != GameModes.Infection && (PowerUserRole != GameRole.GuardianAngel || player.IsAlive || !target.IsAlive))
+                            return false;
+
+                        if (!GameReferences.GameState.InTaskState())
+                            return false;
+                    }
+                    break;
             }
             return true;
         }

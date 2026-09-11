@@ -1,6 +1,7 @@
 ﻿using AntiCheat.Config;
 using Il2CppSG.Airlock;
 using Il2CppSG.Airlock.Network;
+using Il2CppSG.Airlock.Roles;
 using UnityEngine;
 
 namespace AntiCheat.Managers
@@ -53,7 +54,7 @@ namespace AntiCheat.Managers
 
             if (GUI.Button(new Rect(20f, 260f, 160f, 30f), "Die"))
             {
-                GameReferences.Killing!.KillPlayer(UnityEngine.Object.FindObjectOfType<AirlockPeer>(), GameReferences.Rig!.PState, GameReferences.Rig.PState.PlayerId, false);
+                GameReferences.Killing!.RPC_TargetedAction(GameReferences.Runner.LocalPlayer, GameReferences.Runner.LocalPlayer, (int)ProximityTargetedAction.Kill);
             }
 
             if (GUI.Button(new Rect(20f, 290f, 160f, 30f), "vote"))

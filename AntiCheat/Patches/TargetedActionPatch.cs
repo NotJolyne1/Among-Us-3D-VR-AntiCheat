@@ -1,5 +1,6 @@
 ﻿using AntiCheat;
 using AntiCheat.Config;
+using AntiCheat.Managers;
 using AntiCheat.Managers.AntiCheat;
 using HarmonyLib;
 using Il2CppFusion;
@@ -27,6 +28,25 @@ public static class TargetedActionPatch
 
             if (action == (int)ProximityTargetedAction.Vote)
                 return AntiCheatMain.VerifyDeputyVote(killer, victim);
+
+
+            if (action == (int)ProximityTargetedAction.KillSelf)
+            {
+                if (killer == null) return false;
+
+                if (Commands.GetPlayerRole(killer.PlayerId) != GameRole.Revenger)
+                    return false;
+
+                if (!GameReferences.GameState!.InTaskState())
+                    return false;
+            }
+
+            if (action == (int)ProximityTargetedAction.Neutralize)
+                return AntiCheatMain.VerifyPowerup(killer, victim, PowerUps.Stun);
+
+            if (action == (int)ProximityTargetedAction.Guard)
+                return AntiCheatMain.VerifyPowerup(killer, victim, PowerUps.Guard);
+
         }
 
         return true;

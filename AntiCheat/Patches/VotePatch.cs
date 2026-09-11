@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 public static class SkipVotePatch
 {
     [HarmonyPrefix]
-    public static void Prefix(PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
+    public static bool Prefix(PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
     {
         if (Settings.IsHost && Settings.AntiCheatEnabled)
         {
@@ -20,8 +20,10 @@ public static class SkipVotePatch
 
                 if (InfoVoter != null)
                     AntiCheatMain.Detected(InfoVoter, "Illegal vote data");
+                return false;
             }
         }
+        return true;
     }
 }
 
@@ -29,7 +31,7 @@ public static class SkipVotePatch
 public static class VotePatch
 {
     [HarmonyPrefix]
-    public static void Prefix(PlayerRef voteAgainstPlayer, PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
+    public static bool Prefix(PlayerRef voteAgainstPlayer, PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
     {
         if (Settings.IsHost && Settings.AntiCheatEnabled)
         {
@@ -39,7 +41,9 @@ public static class VotePatch
 
                 if (InfoVoter != null)
                     AntiCheatMain.Detected(InfoVoter, "Illegal vote data");
+                return false;
             }
         }
+        return true;
     }
 }
