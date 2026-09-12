@@ -19,7 +19,7 @@ public static class SkipVotePatch
                 PlayerState InfoVoter = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
                 if (InfoVoter != null)
-                    AntiCheatMain.Detected(InfoVoter, "Illegal vote data");
+                    AntiCheatMain.CheaterDetected(InfoVoter, "Illegal vote data");
                 return false;
             }
         }
@@ -40,7 +40,7 @@ public static class VotePatch
                 PlayerState InfoVoter = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
                 if (InfoVoter != null)
-                    AntiCheatMain.Detected(InfoVoter, "Illegal vote data");
+                    AntiCheatMain.CheaterDetected(InfoVoter, "Illegal vote data");
                 return false;
             }
         }

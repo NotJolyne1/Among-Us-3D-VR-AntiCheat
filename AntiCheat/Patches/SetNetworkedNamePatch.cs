@@ -15,7 +15,7 @@ public static class SetNetworkedNamePatch
         {
             if (!AntiCheatMain.VerifyName(__instance.PState, name))
             {
-                AntiCheatMain.Detected(__instance.PState, "Illegal name change");
+                AntiCheatMain.CheaterDetected(__instance.PState, "Illegal name change");
             }
         }
     }

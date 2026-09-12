@@ -118,9 +118,10 @@ namespace AntiCheat.Managers
             GUI.Label(new Rect(34f, 105f, 700f, 24f), $"Installed: {Settings.Version}    Latest: {AutoUpdateManager.LatestVersion}", TextStyle);
             GUI.Label(new Rect(34f, 135f, 700f, 24f), AutoUpdateManager.Status, DescriptionStyle);
 
-            if (!AutoUpdateManager.Updating && GUI.Button(new Rect(34f, 175f, 150f, 34f), "Update and restart", ButtonStyle)) AutoUpdateManager.Update();
+            if (!AutoUpdateManager.Updating && GUI.Button(new Rect(34f, 175f, 150f, 34f), "Auto update and restart", ButtonStyle)) AutoUpdateManager.Update();
+            if (!AutoUpdateManager.Updating && GUI.Button(new Rect(196f, 175f, 150f, 34f), "Open latest release", ButtonStyle)) Application.OpenURL("https://github.com/NotJolyne1/AntiCheat/releases");
 
-            if (!AutoUpdateManager.Updating && GUI.Button(new Rect(196f, 175f, 110f, 34f), "Ignore", RemoveButtonStyle))
+            if (!AutoUpdateManager.Updating && GUI.Button(new Rect(358f, 175f, 110f, 34f), "Ignore", RemoveButtonStyle))
             {
                 Settings.IgnoreUpdate = true;
                 Settings.Outdated = false;
@@ -150,7 +151,7 @@ namespace AntiCheat.Managers
                 return;
             }
 
-            GUI.Label(new Rect(20f, 12f, 300f, 28f), "Anti-Cheat", TitleStyle);
+            GUI.Label(new Rect(20f, 12f, 300f, 28f), $"Anti-Cheat V{Settings.Version}", TitleStyle);
             GUI.Label(new Rect(Window.width - 405f, 7f, 395f, 36f), Settings.IsHost ? "" : "Host required to modify", new GUIStyle(Settings.IsHost ? TextStyle : WarningStyle) { alignment = TextAnchor.MiddleRight, fontSize = 14 });
             GUI.Box(new Rect(14f, 49f, 150f, Window.height - 63f), GUIContent.none, PanelStyle);
 

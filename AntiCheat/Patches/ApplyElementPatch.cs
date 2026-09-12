@@ -17,7 +17,7 @@ public static class ApplyElementPatch
         {
             if (!AntiCheatMain.VerifyCosmeticChange(__instance, elementIndex, playerIndex))
             {
-                AntiCheatMain.Detected(__instance.PState, "Illegal cosmetic data");
+                AntiCheatMain.CheaterDetected(__instance.PState, "Illegal cosmetic data");
                 return false;
             }
         }

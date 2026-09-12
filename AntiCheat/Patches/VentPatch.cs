@@ -15,7 +15,7 @@ public static class EnterVentPatch
         {
             if (!AntiCheatMain.VerifyVentEnter(__instance))
             {
-                AntiCheatMain.Detected(__instance.PState, "Illegal vent enter data");
+                AntiCheatMain.CheaterDetected(__instance.PState, "Illegal vent enter data");
                 return false;
             }
         }
@@ -34,7 +34,7 @@ public static class ExitVentPatch
         {
             if (!AntiCheatMain.VerifyVentExit(__instance))
             {
-                AntiCheatMain.Detected(__instance.PState, "Illegal vent exit data");
+                AntiCheatMain.CheaterDetected(__instance.PState, "Illegal vent exit data");
                 return false;
             }
         }

@@ -21,7 +21,7 @@ public static class CallVotePatch
                 PlayerState InfoCaller = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
                 if (InfoCaller != null)
-                    AntiCheatMain.Detected(InfoCaller, "Illegal meeting call");
+                    AntiCheatMain.CheaterDetected(InfoCaller, "Illegal meeting call");
 
                 return false;
             }
@@ -47,7 +47,7 @@ public static class CallVotePatch2
                 PlayerState InfoCaller = Helpers.GetPlayerstateFromID(info.Source.PlayerId);
 
                 if (InfoCaller != null)
-                    AntiCheatMain.Detected(InfoCaller, "Illegal body report");
+                    AntiCheatMain.CheaterDetected(InfoCaller, "Illegal body report");
 
                 return false;
             }

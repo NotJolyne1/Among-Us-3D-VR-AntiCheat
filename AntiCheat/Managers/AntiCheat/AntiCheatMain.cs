@@ -64,9 +64,9 @@ namespace AntiCheat.Managers.AntiCheat
             {
                 if (player == null || !player.IsConnected || !player.IsSpawned) continue;
 
-                if (Settings.PlayerBlacklistModule && player.IsBlacklisted() && !player.IsWhitelisted()) Detected(player, "Player is on the blacklist");
-                if (Settings.CosmeticValidateModule && player.HatId == 98) Detected(player, "Illegal cosmetics");
-                if (Settings.UsernameValidateModule && !VerifyName(player, player.NetworkName.Value)) Detected(player, "Illegal name");
+                if (Settings.PlayerBlacklistModule && player.IsBlacklisted() && !player.IsWhitelisted()) CheaterDetected(player, "Player is on the blacklist", false);
+                if (Settings.CosmeticValidateModule && player.HatId == 98) CheaterDetected(player, "Illegal cosmetics");
+                if (Settings.UsernameValidateModule && !VerifyName(player, player.NetworkName.Value)) CheaterDetected(player, "Illegal name");
             }
         }
 
@@ -128,7 +128,7 @@ namespace AntiCheat.Managers.AntiCheat
                 }
 
                 SpeedDetections.Remove(player);
-                Detected(player, "Speed Hacks Detected");
+                CheaterDetected(player, "Speed Hacks Detected");
             }
         }
 
@@ -155,12 +155,12 @@ namespace AntiCheat.Managers.AntiCheat
             }
         }
 
-        internal static void Detected(PlayerState cheater, string reason)
+        internal static void CheaterDetected(PlayerState cheater, string reason, bool blacklist = true)
         {
             if (Settings.IsHost && !cheater.IsWhitelisted())
             {
                 Logger.Warning($"Kicking {cheater.NetworkName.Value} for cheating. Reason: {reason}");
-                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, Settings.BlacklistOnDetect);
+                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, Settings.BlacklistOnDetect && blacklist);
             }
         }
 

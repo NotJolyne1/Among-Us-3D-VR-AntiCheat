@@ -18,7 +18,7 @@ public static class CompleteTaskPatch
 
         if (!AntiCheatMain.VerifyTaskComplete(__instance.PState))
         {
-            AntiCheatMain.Detected(__instance.PState, "Illegal task completion");
+            AntiCheatMain.CheaterDetected(__instance.PState, "Illegal task completion");
             return false;
         }
 
@@ -32,7 +32,7 @@ public static class CompleteTaskPatch
 
         if (Times.Count >= 5)
         {
-            AntiCheatMain.Detected(__instance.PState, "Illegal task completion");
+            AntiCheatMain.CheaterDetected(__instance.PState, "Illegal task completion");
             Times.Clear();
         }
 

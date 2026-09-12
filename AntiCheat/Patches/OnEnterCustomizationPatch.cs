@@ -14,7 +14,7 @@ public static class OnEnterCustomizationPatch
         {
             if (!GameReferences.GameState!.InLobbyState() && !__instance.PState.IsSpectating)
             {
-                AntiCheatMain.Detected(__instance.PState, "Illegal customization entry");
+                AntiCheatMain.CheaterDetected(__instance.PState, "Illegal customization entry");
             }
         }
     }

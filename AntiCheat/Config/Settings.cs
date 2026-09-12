@@ -2,7 +2,7 @@
 {
     internal class Settings
     {
-        public const string Version = "0.9.0";
+        public const string Version = "1.0.0";
         public static bool Outdated = false;
         internal static bool IgnoreUpdate { get; set; }
         internal static bool DebugMode { get; set; } = false;
