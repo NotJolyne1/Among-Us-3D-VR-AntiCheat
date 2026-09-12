@@ -69,5 +69,5 @@ namespace AntiCheat
  * Speed Hack detection
  * Task completion verification
  * Lobby Door toggle verification
- * Anti task reset hack
+ * Anti task reset exploit
 */
