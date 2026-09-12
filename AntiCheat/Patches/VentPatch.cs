@@ -30,7 +30,7 @@ public static class ExitVentPatch
     public static bool Prefix(NetworkedLocomotionPlayer __instance)
     {
 
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.VentValidateModule)
         {
             if (!AntiCheatMain.VerifyVentExit(__instance))
             {

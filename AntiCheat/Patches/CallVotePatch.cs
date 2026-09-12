@@ -12,7 +12,7 @@ public static class CallVotePatch
     [HarmonyPrefix]
     public static bool Prefix(PlayerRef sourcePlayer, NetworkBool forceVote, ref RpcInfo info)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.CallMeetingValidateModule)
         {
             PlayerState caller = Helpers.GetPlayerstateFromID(sourcePlayer.PlayerId);
 
@@ -37,7 +37,7 @@ public static class CallVotePatch2
     [HarmonyPrefix]
     public static bool Prefix(int foundPlayer, PlayerRef sourcePlayer, NetworkBool forceVote, [Optional] ref RpcInfo info)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.CallBodyReportValidateModule)
         {
             PlayerState caller = Helpers.GetPlayerstateFromID(sourcePlayer.PlayerId);
             PlayerState body = Helpers.GetPlayerstateFromID(foundPlayer);

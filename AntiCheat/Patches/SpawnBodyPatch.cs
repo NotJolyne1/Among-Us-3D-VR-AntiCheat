@@ -12,7 +12,7 @@ public static class SpawnBodyPatch
     [HarmonyPostfix]
     public static void Postfix(SpawnManager __instance, PlayerRef id, NetworkRigidbody rb)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.SpawnBodyValidateModule)
         {
             if (!AntiCheatMain.VerifyBodySpawn(id, rb))
             {

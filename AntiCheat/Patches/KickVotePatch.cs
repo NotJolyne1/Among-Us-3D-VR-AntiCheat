@@ -14,7 +14,7 @@ public static class KickVotePatch
     [HarmonyPrefix]
     public static bool Prefix(ModerationManager __instance, int sourcePlayer, int kickPlayer)
     {
-        if (!Settings.IsHost || !Settings.AntiCheatEnabled) return true;
+        if (!Settings.IsHost || !Settings.AntiCheatEnabled || !Settings.KickVoteValidateModule) return true;
 
         if (!AntiCheatMain.VerifyKickVote(sourcePlayer, kickPlayer))
         {

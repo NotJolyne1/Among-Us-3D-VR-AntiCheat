@@ -10,7 +10,7 @@ public static class OnEnterCustomizationPatch
 {
     public static void Prefix(NetworkedLocomotionPlayer __instance)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.CosmeticValidateModule)
         {
             if (!GameReferences.GameState!.InLobbyState() && !__instance.PState.IsSpectating)
             {

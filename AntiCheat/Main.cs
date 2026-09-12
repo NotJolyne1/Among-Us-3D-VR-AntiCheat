@@ -4,7 +4,7 @@ using AntiCheat.Managers.AntiCheat;
 using MelonLoader;
 using UnityEngine.InputSystem;
 
-[assembly: MelonInfo(typeof(AntiCheat.Main), "Anti-Cheat Mod", "1.0.0", "Jolyne")]
+[assembly: MelonInfo(typeof(AntiCheat.Main), "Anti-Cheat Mod", Settings.Version, "Jolyne")]
 [assembly: MelonGame("Innersloth", null)]
 namespace AntiCheat
 {
@@ -18,6 +18,7 @@ namespace AntiCheat
             Settings.DebugMode = false;
 #endif
             AntiCheatMain.ResetAntiCheat(true);
+            AutoUpdateManager.Check();
             Logger.Msg("Anti-Cheat loaded");
         }
 
@@ -31,6 +32,7 @@ namespace AntiCheat
 
         public override void OnGUI()
         {
+            DebugGUI.Display();
             GUIManager.Display();
         }
 

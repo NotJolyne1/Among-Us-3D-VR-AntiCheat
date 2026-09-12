@@ -13,8 +13,7 @@ public static class ApplyElementPatch
     [HarmonyPrefix]
     public static bool Prefix(NetworkedLocomotionPlayer __instance, int elementIndex, int playerIndex)
     {
-
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.CosmeticValidateModule)
         {
             if (!AntiCheatMain.VerifyCosmeticChange(__instance, elementIndex, playerIndex))
             {

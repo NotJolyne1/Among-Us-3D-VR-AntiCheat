@@ -13,7 +13,7 @@ public static class CompleteTaskPatch
     [HarmonyPrefix]
     public static bool Prefix(MinigamePlayer __instance)
     {
-        if (!Settings.IsHost || !Settings.AntiCheatEnabled)
+        if (!Settings.IsHost || !Settings.AntiCheatEnabled || !Settings.TaskCompletedValidateModule)
             return true;
 
         if (!AntiCheatMain.VerifyTaskComplete(__instance.PState))

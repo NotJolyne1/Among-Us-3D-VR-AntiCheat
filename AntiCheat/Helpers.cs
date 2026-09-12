@@ -18,5 +18,22 @@ namespace AntiCheat
 
             return null;
         }
+
+        public static string GetPlayerPlatform(PlayerState player)
+        {
+            string UserId = GameReferences.Runner!.GetPlayerUserId(player.PlayerId);
+
+            if (UserId.StartsWith("Steam") && player.Is3DPlayer)
+                return "Steam 3D";
+            if (UserId.StartsWith("Steam") && !player.Is3DPlayer)
+                return "Steam VR";
+            if (UserId.StartsWith("Meta"))
+                return "Meta Quest";
+            if (UserId.StartsWith("PS5"))
+                return "Playstation VR";
+            if (UserId.StartsWith("Pico"))
+                return "Pico VR";
+            return "unknown";
+        }
     }
 }

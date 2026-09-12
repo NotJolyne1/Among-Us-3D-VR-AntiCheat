@@ -64,9 +64,9 @@ namespace AntiCheat.Managers.AntiCheat
             {
                 if (player == null || !player.IsConnected || !player.IsSpawned) continue;
 
-                if (player.IsBlacklisted() && !player.IsWhitelisted()) Detected(player, "Player is on the blacklist");
-                if (player.HatId == 98) Detected(player, "Illegal cosmetics");
-                if (!VerifyName(player, player.NetworkName.Value)) Detected(player, "Illegal name");
+                if (Settings.PlayerBlacklistModule && player.IsBlacklisted() && !player.IsWhitelisted()) Detected(player, "Player is on the blacklist");
+                if (Settings.CosmeticValidateModule && player.HatId == 98) Detected(player, "Illegal cosmetics");
+                if (Settings.UsernameValidateModule && !VerifyName(player, player.NetworkName.Value)) Detected(player, "Illegal name");
             }
         }
 
@@ -75,7 +75,7 @@ namespace AntiCheat.Managers.AntiCheat
 
         private static void CheckSpeed()
         {
-            if (!Settings.IsHost || !Settings.AntiCheatEnabled || GameReferences.Spawn == null)
+            if (!Settings.IsHost || !Settings.AntiCheatEnabled || !Settings.PlayerSpeedValidateModule || GameReferences.Spawn == null)
             {
                 SpeedTimer = 0f;
                 PrevPosition.Clear();
@@ -138,6 +138,7 @@ namespace AntiCheat.Managers.AntiCheat
         internal static void ResetAntiCheat(bool sceneReset = false)
         {
             Logger.DebugMsg("Resetting Anti-Cheat");
+            Commands.InitializeBlacklist();
             MeetingsCalled.Clear();
             PositionViolations.Clear();
             SpeedDetections.Clear();
@@ -159,7 +160,7 @@ namespace AntiCheat.Managers.AntiCheat
             if (Settings.IsHost && !cheater.IsWhitelisted())
             {
                 Logger.Warning($"Kicking {cheater.NetworkName.Value} for cheating. Reason: {reason}");
-                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, true);
+                if (Settings.KickCheaters) Commands.KickPlayerViaAntiCheat(cheater.PlayerId, reason, Settings.BlacklistOnDetect);
             }
         }
 

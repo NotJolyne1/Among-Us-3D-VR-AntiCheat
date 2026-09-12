@@ -15,7 +15,7 @@ public static class TargetedActionPatch
     [HarmonyPrefix]
     public static bool Prefix(PlayerRef targetedPlayer, PlayerRef perpetrator, int action)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.TargetedActionValidateModule)
         {
             PlayerState killer = Helpers.GetPlayerstateFromID(perpetrator.PlayerId);
             PlayerState victim = Helpers.GetPlayerstateFromID(targetedPlayer.PlayerId);

@@ -13,12 +13,13 @@ public static class SpawnInitializationPatch
     {
         if (Settings.IsHost && Settings.AntiCheatEnabled)
         {
-            if (!AntiCheatMain.VerifyJoin(__instance, moderationID, hat))
+            if (__instance.PState.IsBlacklisted() && Settings.PlayerBlacklistModule)
+                AntiCheatMain.Detected(__instance.PState, "Player is on blacklist");
+
+            if (Settings.PlayerJoinValidateModule && !AntiCheatMain.VerifyJoin(__instance, moderationID, hat))
             {
                 AntiCheatMain.Detected(__instance.PState, "Invalid join data");
             }
-            if (__instance.PState.IsBlacklisted())
-                AntiCheatMain.Detected(__instance.PState, "Player is on blacklist");
         }
     }
 }

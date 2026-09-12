@@ -12,7 +12,7 @@ public static class RequestSpecificPowerupPatch
 {
     public static bool Prefix(int playerID, string playerFacingPowerName)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.RequestPowerupValidateModule)
         {
             if (GameReferences.GameState!.GameModeStateValue.GameMode == GameModes.Infection)
             {

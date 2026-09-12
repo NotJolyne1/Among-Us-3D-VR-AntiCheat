@@ -11,7 +11,7 @@ public static class SetNetworkedNamePatch
     [HarmonyPostfix]
     public static void Postfix(NetworkedLocomotionPlayer __instance, string name)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.UsernameValidateModule)
         {
             if (!AntiCheatMain.VerifyName(__instance.PState, name))
             {

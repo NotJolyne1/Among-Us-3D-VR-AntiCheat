@@ -18,7 +18,7 @@ public static class CameraPlayPatch
     public static bool Prefix(GlobalRPCCaller __instance)
     {
 
-        if (!Settings.IsHost || !Settings.AntiCheatEnabled) return true;
+        if (!Settings.IsHost || !Settings.AntiCheatEnabled || !Settings.TakePhotoValidateModule) return true;
 
         var obj = GameObject.Find("InteractionComponents");
         if (obj == null || obj.GetComponent<GlobalRPCCaller>() != __instance) return true;

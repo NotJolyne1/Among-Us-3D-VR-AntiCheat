@@ -10,7 +10,7 @@ public static class UsePowerupPatch
 {
     public static bool Prefix(PlayerState __instance)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.UsePowerupValidateModule)
         {
             if (!AntiCheatMain.VerifyUsePowerup(__instance))
             {

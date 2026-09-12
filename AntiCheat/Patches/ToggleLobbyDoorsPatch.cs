@@ -12,7 +12,7 @@ public static class ToggleLobbyDoorsPatch
     [HarmonyPostfix]
     public static void Prefix(GameStateManager __instance, NetworkBool close)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.ToggleLobbyDoorValidateModule)
         {
             if (!AntiCheatMain.VerifyToggleLobbyDoors(__instance, close))
             {

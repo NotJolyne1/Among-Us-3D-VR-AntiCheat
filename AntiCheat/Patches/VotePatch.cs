@@ -12,7 +12,7 @@ public static class SkipVotePatch
     [HarmonyPrefix]
     public static bool Prefix(PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.VoteValidateModule)
         {
             if (!AntiCheatMain.VerifySkipVote(sourcePlayer, ref info))
             {
@@ -33,7 +33,7 @@ public static class VotePatch
     [HarmonyPrefix]
     public static bool Prefix(PlayerRef voteAgainstPlayer, PlayerRef sourcePlayer, [Optional] ref RpcInfo info)
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.VoteValidateModule)
         {
             if (!AntiCheatMain.VerifyVote(sourcePlayer, voteAgainstPlayer, ref info))
             {

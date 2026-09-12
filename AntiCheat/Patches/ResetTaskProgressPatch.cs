@@ -11,7 +11,7 @@ public static class ResetTaskProgressPatch
     [HarmonyPrefix]
     public static bool Prefix()
     {
-        if (Settings.IsHost && Settings.AntiCheatEnabled)
+        if (Settings.IsHost && Settings.AntiCheatEnabled && Settings.TaskCompletedValidateModule)
         {
             if (!GameReferences.GameState!.InLobbyState() && !GameReferences.Cutscene!._isEndGame)
             {
