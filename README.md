@@ -1,5 +1,5 @@
 # Among Us 3D/VR AntiCheat
-The most reliable and secure publicly available Among Us 3D/VR anti-cheat
+A reliable and secure publicly available Among Us 3D/VR anti-cheat
 
 
 This anti-cheat was made because all other anti cheats are unreliable or just don't fully work and seem "unfinished". Every module in this anti cheat is tested before publishing, I also made this to help streamers and other players play Among Us 3D/VR without worrying about cheaters joining and ruining the game.
